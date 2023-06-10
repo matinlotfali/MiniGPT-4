@@ -108,6 +108,17 @@ article = """<p><a href='https://minigpt-4.github.io'><img src='https://img.shie
 
 #TODO show examples below
 
+
+def main_refresh(gr_img, text, chat_state):
+    if gr_img is None:
+        return None, None, gr.update(interactive=True), chat_state, None
+    chat_state = CONV_VISION.copy()
+    img_list = []
+    llm_message = chat.upload_img(gr_img, chat_state, img_list)
+    return gr.update(interactive=False), gr.update(interactive=True, placeholder='Type and press Enter'), gr.update(
+        value="Start Chatting", interactive=False), chat_state, img_list
+
+
 with gr.Blocks() as demo:
     gr.Markdown(title)
     gr.Markdown(description)
@@ -115,7 +126,7 @@ with gr.Blocks() as demo:
 
     with gr.Row():
         with gr.Column(scale=0.5):
-            image = gr.Image(type="pil")
+            image = gr.Image(type="pil", source="webcam", streaming=True, mirror_webcam=True)
             upload_button = gr.Button(value="Upload & Start Chat", interactive=True, variant="primary")
             clear = gr.Button("Restart")
             
@@ -144,10 +155,11 @@ with gr.Blocks() as demo:
             text_input = gr.Textbox(label='User', placeholder='Please upload your image first', interactive=False)
     
     upload_button.click(upload_img, [image, text_input, chat_state], [image, text_input, upload_button, chat_state, img_list])
-    
+    demo.load(main_refresh,         [image, text_input, chat_state], [image, text_input, upload_button, chat_state, img_list], every=1)
+
     text_input.submit(gradio_ask, [text_input, chatbot, chat_state], [text_input, chatbot, chat_state]).then(
         gradio_answer, [chatbot, chat_state, img_list, num_beams, temperature], [chatbot, chat_state, img_list]
     )
     clear.click(gradio_reset, [chat_state, img_list], [chatbot, image, text_input, upload_button, chat_state, img_list], queue=False)
 
-demo.launch(share=True, enable_queue=True)
+demo.queue().launch(inbrowser=True)

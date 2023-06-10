@@ -51,6 +51,16 @@ conda env create -f environment.yml
 conda activate minigpt4
 ```
 
+For Windows, make sure you have the latest 
+[Microsoft Build Tools](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022) and
+[CUDA Toolkit](https://developer.nvidia.com/cuda-downloads),
+and replace the following Python packages:
+
+```
+pip3 uninstall bitsandbytes torch torchvision torchaudio
+pip3 install git+https://github.com/Keith-Hon/bitsandbytes-windows
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+```
 
 **2. Prepare the pretrained Vicuna weights**
 
